@@ -1,0 +1,28 @@
+{
+  "name": "ddotz-hud",
+  "version": "1.0.0",
+  "description": "Enhanced statusline HUD for Claude Code",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ddotz-hud": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "claude-code",
+    "statusline",
+    "hud"
+  ],
+  "author": "ddotz",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
