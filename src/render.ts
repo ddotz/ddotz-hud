@@ -5,7 +5,7 @@
 import { homedir } from 'node:os';
 import type { HudContext } from './types.js';
 import {
-  RESET, DIM, BOLD, CYAN, MAGENTA, BLUE,
+  RESET, DIM, BOLD, CYAN, MAGENTA, BLUE, GREEN, RED,
   getContextColor, getLimitColor, getCostColor
 } from './colors.js';
 
@@ -50,7 +50,14 @@ export function render(ctx: HudContext): string {
   line1Parts.push(`${BOLD}${modelName}${RESET}`);
 
   if (ctx.git) {
-    line1Parts.push(`${CYAN}\u2387 ${ctx.git.branch}${ctx.git.status ? ' ' + ctx.git.status : ''}${RESET}`);
+    let gitStr = `${CYAN}\u2387 ${ctx.git.branch}${ctx.git.status ? ' ' + ctx.git.status : ''}${RESET}`;
+    // additions/deletions 표시
+    if (ctx.git.additions > 0 || ctx.git.deletions > 0) {
+      const addStr = ctx.git.additions > 0 ? `${GREEN}+${ctx.git.additions}${RESET}` : '';
+      const delStr = ctx.git.deletions > 0 ? `${RED}-${ctx.git.deletions}${RESET}` : '';
+      gitStr += ` ${[addStr, delStr].filter(Boolean).join(' ')}`;
+    }
+    line1Parts.push(gitStr);
   } else {
     line1Parts.push(`${DIM}\u2387 no git${RESET}`);
   }
@@ -60,8 +67,18 @@ export function render(ctx: HudContext): string {
   // Line 2: profile | 5h:XX% wk:XX% | ctx% | $cost | duration | agents:N | bg:N/5
   const line2Parts: string[] = [];
 
-  // Profile
-  line2Parts.push(`${CYAN}default${RESET}`);
+  // Profile: 글쓰기 스타일 (output-style) 표시
+  let outputStyle = 'default';
+  if (ctx.stdin.output_style) {
+    if (typeof ctx.stdin.output_style === 'string') {
+      outputStyle = ctx.stdin.output_style;
+    } else if (typeof ctx.stdin.output_style === 'object') {
+      // output_style이 객체인 경우 (name, id 등의 필드 처리)
+      const styleObj = ctx.stdin.output_style as any;
+      outputStyle = styleObj.name || styleObj.id || styleObj.display_name || 'default';
+    }
+  }
+  line2Parts.push(`${CYAN}${outputStyle}${RESET}`);
 
   // Rate Limits (always show both 5h and wk)
   if (ctx.rateLimits) {

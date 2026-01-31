@@ -27,8 +27,8 @@ export function parseTranscript(transcriptPath: string | undefined): TranscriptD
       try {
         const entry = JSON.parse(line);
 
-        // Session start
-        if (entry.type === 'init' && entry.timestamp) {
+        // Session start: 첫 번째 timestamp가 있는 entry를 사용
+        if (!result.sessionStart && entry.timestamp) {
           result.sessionStart = new Date(entry.timestamp);
         }
 

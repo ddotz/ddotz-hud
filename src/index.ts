@@ -36,6 +36,10 @@ async function main(): Promise<void> {
       return;
     }
 
+    // Debug: stdin 구조 확인
+    // console.error('[DEBUG] stdin keys:', Object.keys(stdin));
+    // console.error('[DEBUG] output_style:', typeof stdin.output_style, JSON.stringify(stdin.output_style));
+
     const cwd = stdin.cwd || process.cwd();
 
     // Gather all data

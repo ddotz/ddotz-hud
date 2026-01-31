@@ -18,6 +18,7 @@ export interface StatuslineStdin {
       cache_read_input_tokens: number;
     };
   };
+  output_style?: string | Record<string, any>;  // 글쓰기 스타일 (문자열 또는 객체)
 }
 
 export interface RateLimits {
@@ -27,7 +28,9 @@ export interface RateLimits {
 
 export interface GitInfo {
   branch: string;
-  status: string;
+  status: string;        // 변경된 파일 수: "(N)"
+  additions: number;     // 추가된 라인 수
+  deletions: number;     // 삭제된 라인 수
 }
 
 export interface TranscriptData {
