@@ -28,7 +28,7 @@ export interface RateLimits {
 
 export interface GitInfo {
   branch: string;
-  status: string;        // 변경된 파일 수: "(N)"
+  version: string;       // 프로젝트 버전: "vX.Y.Z"
 }
 
 export interface TranscriptData {

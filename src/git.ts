@@ -3,6 +3,8 @@
  */
 
 import { execSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { GitInfo } from './types.js';
 
 export function getGitInfo(cwd: string): GitInfo | null {
@@ -13,21 +15,19 @@ export function getGitInfo(cwd: string): GitInfo | null {
       timeout: 1000,
     }).trim();
 
-    let status = '';
-
+    // Get version from package.json
+    let version = '';
     try {
-      const statusOutput = execSync('git status --porcelain 2>/dev/null', {
-        cwd,
-        encoding: 'utf-8',
-        timeout: 1000,
-      }).trim();
-      if (statusOutput) {
-        const lines = statusOutput.split('\n').filter(l => l.trim());
-        status = `(${lines.length})`;
+      const pkgPath = join(cwd, 'package.json');
+      if (existsSync(pkgPath)) {
+        const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+        if (pkg.version) {
+          version = `v${pkg.version}`;
+        }
       }
     } catch { /* ignore */ }
 
-    return { branch, status };
+    return { branch, version };
   } catch {
     return null;
   }

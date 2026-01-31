@@ -50,7 +50,7 @@ export function render(ctx: HudContext): string {
   line1Parts.push(`${BOLD}${modelName}${RESET}`);
 
   if (ctx.git) {
-    const gitStr = `${CYAN}\u2387 ${ctx.git.branch}${ctx.git.status ? ' ' + ctx.git.status : ''}${RESET}`;
+    const gitStr = `${CYAN}\u2387 ${ctx.git.branch}${ctx.git.version ? ' ' + ctx.git.version : ''}${RESET}`;
     line1Parts.push(gitStr);
   } else {
     line1Parts.push(`${DIM}\u2387 no git${RESET}`);
