@@ -29,8 +29,6 @@ export interface RateLimits {
 export interface GitInfo {
   branch: string;
   status: string;        // 변경된 파일 수: "(N)"
-  additions: number;     // 추가된 라인 수
-  deletions: number;     // 삭제된 라인 수
 }
 
 export interface TranscriptData {
