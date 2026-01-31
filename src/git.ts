@@ -15,14 +15,21 @@ export function getGitInfo(cwd: string): GitInfo | null {
       timeout: 1000,
     }).trim();
 
-    // Get version from package.json
+    // Get version from package.json or plugin.json
     let version = '';
     try {
       const pkgPath = join(cwd, 'package.json');
+      const pluginPath = join(cwd, '.claude-plugin/plugin.json');
+
       if (existsSync(pkgPath)) {
         const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
         if (pkg.version) {
           version = `v${pkg.version}`;
+        }
+      } else if (existsSync(pluginPath)) {
+        const plugin = JSON.parse(readFileSync(pluginPath, 'utf-8'));
+        if (plugin.version) {
+          version = `v${plugin.version}`;
         }
       }
     } catch { /* ignore */ }
