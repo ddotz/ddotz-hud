@@ -5,7 +5,7 @@
 import { homedir } from 'node:os';
 import type { HudContext } from './types.js';
 import {
-  RESET, DIM, BOLD, CYAN, MAGENTA, BLUE,
+  RESET, DIM, BOLD, CYAN, MAGENTA, BLUE, GREEN, RED,
   getContextColor, getLimitColor, getCostColor
 } from './colors.js';
 
@@ -50,7 +50,13 @@ export function render(ctx: HudContext): string {
   line1Parts.push(`${BOLD}${modelName}${RESET}`);
 
   if (ctx.git) {
-    const gitStr = `${CYAN}\u2387 ${ctx.git.branch}${ctx.git.status ? ' ' + ctx.git.status : ''}${RESET}`;
+    let gitStr = `${CYAN}\u2387 ${ctx.git.branch}${ctx.git.status ? ' ' + ctx.git.status : ''}${RESET}`;
+    // additions/deletions 표시
+    if (ctx.git.additions > 0 || ctx.git.deletions > 0) {
+      const addStr = ctx.git.additions > 0 ? `${GREEN}+${ctx.git.additions}${RESET}` : '';
+      const delStr = ctx.git.deletions > 0 ? `${RED}-${ctx.git.deletions}${RESET}` : '';
+      gitStr += ` ${[addStr, delStr].filter(Boolean).join(' ')}`;
+    }
     line1Parts.push(gitStr);
   } else {
     line1Parts.push(`${DIM}\u2387 no git${RESET}`);
