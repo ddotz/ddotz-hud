@@ -74,8 +74,8 @@ function getCredentials(): string | null {
 }
 
 interface UsageApiResponse {
-  five_hour?: { utilization?: number };
-  seven_day?: { utilization?: number };
+  five_hour?: { utilization?: number; resets_at?: string };
+  seven_day?: { utilization?: number; resets_at?: string };
 }
 
 async function fetchUsage(accessToken: string): Promise<UsageApiResponse | null> {
@@ -127,6 +127,7 @@ export async function getRateLimits(): Promise<RateLimits | null> {
   const data: RateLimits = {
     fiveHour: Math.round(response.five_hour?.utilization ?? 0),
     weekly: Math.round(response.seven_day?.utilization ?? 0),
+    fiveHourResetsAt: response.five_hour?.resets_at ?? null,
   };
 
   writeCache(data);

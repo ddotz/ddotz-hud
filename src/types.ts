@@ -24,6 +24,7 @@ export interface StatuslineStdin {
 export interface RateLimits {
   fiveHour: number;
   weekly: number;
+  fiveHourResetsAt: string | null;  // ISO timestamp when 5h window resets
 }
 
 export interface GitInfo {
@@ -59,5 +60,5 @@ export interface HudContext {
   transcript: TranscriptData;
   contextPercent: number;
   cost: number;
-  duration: string;
+  resetTimeLeft: string;  // 5h rolling window reset time left
 }

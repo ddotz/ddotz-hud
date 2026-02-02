@@ -30,16 +30,6 @@ function shortenPath(path: string, maxLen = 30): string {
   return '.../' + result;
 }
 
-function formatDuration(ms: number): string {
-  const totalMinutes = Math.floor(ms / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (hours > 0) {
-    return `${hours}hr ${minutes}m`;
-  }
-  return `${minutes}m`;
-}
 
 export function render(ctx: HudContext): string {
   const modelName = ctx.stdin.model?.display_name || ctx.stdin.model?.id || 'Unknown';
@@ -58,7 +48,7 @@ export function render(ctx: HudContext): string {
 
   line1Parts.push(`${DIM}${shortenPath(cwd)}${RESET}`);
 
-  // Line 2: profile | 5h:XX% wk:XX% | ctx% | $cost | duration | agents:N | bg:N/5
+  // Line 2: profile | 5h:XX% wk:XX% | ctx% | $cost | Reset Xh XXm left | agents:N | bg:N/5
   const line2Parts: string[] = [];
 
   // Profile: 글쓰기 스타일 (output-style) 표시
@@ -95,8 +85,8 @@ export function render(ctx: HudContext): string {
     line2Parts.push(`${DIM}$0.00${RESET}`);
   }
 
-  // Duration
-  line2Parts.push(ctx.duration);
+  // Reset time left (5h rolling window)
+  line2Parts.push(`${CYAN}${ctx.resetTimeLeft}${RESET}`);
 
   // Agents (only if > 0)
   const agentCount = ctx.transcript.agents.length;

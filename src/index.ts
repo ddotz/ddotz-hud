@@ -4,7 +4,7 @@
  *
  * Layout:
  * Line 1: Model | Git | CWD
- * Line 2: profile | 5h:XX% wk:XX% | ctx% | $cost | duration | agents:N | bg:N/5
+ * Line 2: profile | 5h:XX% wk:XX% | ctx% | $cost | Reset Xh XXm left | agents:N | bg:N/5
  */
 
 import { readStdin, getContextPercent } from './stdin.js';
@@ -16,15 +16,28 @@ import { render } from './render.js';
 import { DIM, RESET } from './colors.js';
 import type { HudContext } from './types.js';
 
-function formatDuration(ms: number): string {
-  const totalMinutes = Math.floor(ms / 60000);
+function formatResetTimeLeft(resetsAtIso: string | null): string {
+  if (!resetsAtIso) {
+    return 'Reset --:-- left';
+  }
+
+  const now = Date.now();
+  const resetTime = new Date(resetsAtIso).getTime();
+  const remainingMs = resetTime - now;
+
+  if (remainingMs <= 0) {
+    // Already reset or resetting now
+    return 'Reset 00:00 left';
+  }
+
+  const totalMinutes = Math.floor(remainingMs / 60000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
-  if (hours > 0) {
-    return `${hours}hr ${minutes}m`;
-  }
-  return `${minutes}m`;
+  // Format as "Reset hh:mm left"
+  const hh = hours.toString().padStart(2, '0');
+  const mm = minutes.toString().padStart(2, '0');
+  return `Reset ${hh}:${mm} left`;
 }
 
 async function main(): Promise<void> {
@@ -52,9 +65,7 @@ async function main(): Promise<void> {
     const contextPercent = getContextPercent(stdin);
     const cost = estimateCost(stdin);
 
-    const sessionStart = transcript.sessionStart || new Date();
-    const durationMs = Date.now() - sessionStart.getTime();
-    const duration = formatDuration(durationMs);
+    const resetTimeLeft = formatResetTimeLeft(rateLimits?.fiveHourResetsAt ?? null);
 
     // Build context
     const ctx: HudContext = {
@@ -64,7 +75,7 @@ async function main(): Promise<void> {
       transcript,
       contextPercent,
       cost,
-      duration,
+      resetTimeLeft,
     };
 
     // Render and output
