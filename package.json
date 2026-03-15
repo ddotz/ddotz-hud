@@ -1,6 +1,6 @@
 {
   "name": "ddotz-hud",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Enhanced statusline HUD for Claude Code",
   "type": "module",
   "main": "dist/index.js",
