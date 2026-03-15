@@ -26,10 +26,26 @@ Opus 4.5 | ⎇ main (3) | ~/project
 ## Installation
 
 ```bash
-cd ~/Workspace/ddotz-hud
+cd ~/Code/ddotz-hud
 npm install
 npm run build
 ```
+
+## Configuration for Rate Limits (Optional)
+
+To display API usage (5-hour and weekly rate limits), you must provide your Claude Session Key and Organization ID.
+**Keep these keys private and do not upload them to any repository.**
+
+Create a configuration file at `~/.claude/ddotz-hud-config.json` with your credentials:
+
+```json
+{
+  "sessionKey": "sk-ant-...your-session-key-here...",
+  "orgId": "your-organization-uuid-here"
+}
+```
+
+*Alternatively, you can provide them as environment variables: `CLAUDE_SESSION_KEY` and `CLAUDE_ORG_ID`.*
 
 ## Usage
 
@@ -39,7 +55,7 @@ Update `~/.claude/settings.json`:
 {
   "statusLine": {
     "type": "command",
-    "command": "node ~/Workspace/ddotz-hud/dist/index.js",
+    "command": "node ~/Code/ddotz-hud/dist/index.js",
     "padding": 0
   }
 }

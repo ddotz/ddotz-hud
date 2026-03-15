@@ -3,13 +3,12 @@
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { execSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import https from 'node:https';
 import type { RateLimits } from './types.js';
 
-const CACHE_TTL_MS = 30000; // 30 seconds
+const CACHE_TTL_MS = 300000; // 5 minutes cache TTL
 
 interface UsageCache {
   timestamp: number;
@@ -43,30 +42,32 @@ function writeCache(data: RateLimits | null): void {
   } catch { /* ignore */ }
 }
 
-function getCredentials(): string | null {
-  // macOS Keychain
-  if (process.platform === 'darwin') {
-    try {
-      const result = execSync(
-        '/usr/bin/security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null',
-        { encoding: 'utf-8', timeout: 2000 }
-      ).trim();
-      if (result) {
-        const parsed = JSON.parse(result);
-        const creds = parsed.claudeAiOauth || parsed;
-        if (creds.accessToken) return creds.accessToken;
-      }
-    } catch { /* continue */ }
+interface Credentials {
+  sessionKey: string;
+  orgId: string;
+}
+
+function getCredentials(): Credentials | null {
+  // 1. Try Environment Variables First
+  if (process.env.CLAUDE_SESSION_KEY && process.env.CLAUDE_ORG_ID) {
+    return {
+      sessionKey: process.env.CLAUDE_SESSION_KEY,
+      orgId: process.env.CLAUDE_ORG_ID
+    };
   }
 
-  // File fallback
+  // 2. Try User Config File (~/.claude/ddotz-hud-config.json)
   try {
-    const credPath = join(homedir(), '.claude/.credentials.json');
-    if (existsSync(credPath)) {
-      const content = readFileSync(credPath, 'utf-8');
+    const configPath = join(homedir(), '.claude/ddotz-hud-config.json');
+    if (existsSync(configPath)) {
+      const content = readFileSync(configPath, 'utf-8');
       const parsed = JSON.parse(content);
-      const creds = parsed.claudeAiOauth || parsed;
-      if (creds.accessToken) return creds.accessToken;
+      if (parsed.sessionKey && parsed.orgId) {
+        return {
+          sessionKey: parsed.sessionKey,
+          orgId: parsed.orgId
+        };
+      }
     }
   } catch { /* ignore */ }
 
@@ -78,16 +79,20 @@ interface UsageApiResponse {
   seven_day?: { utilization?: number; resets_at?: string };
 }
 
-async function fetchUsage(accessToken: string): Promise<UsageApiResponse | null> {
+async function fetchUsage(creds: Credentials): Promise<UsageApiResponse | null> {
   return new Promise((resolve) => {
+    // Validate orgId avoids path traversal
+    if (creds.orgId.includes('..') || creds.orgId.includes('/')) {
+      return resolve(null);
+    }
+
     const req = https.request({
-      hostname: 'api.anthropic.com',
-      path: '/api/oauth/usage',
+      hostname: 'claude.ai',
+      path: `/api/organizations/${creds.orgId}/usage`,
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'anthropic-beta': 'oauth-2025-04-20',
-        'Content-Type': 'application/json',
+        'Cookie': `sessionKey=${creds.sessionKey}`,
+        'Accept': 'application/json',
       },
       timeout: 5000,
     }, (res) => {
@@ -112,15 +117,13 @@ export async function getRateLimits(): Promise<RateLimits | null> {
     return cache.data;
   }
 
-  const token = getCredentials();
-  if (!token) {
-    writeCache(null);
-    return null;
+  const creds = getCredentials();
+  if (!creds) {
+    return null; // Return null so renderer handles it gracefully
   }
 
-  const response = await fetchUsage(token);
+  const response = await fetchUsage(creds);
   if (!response) {
-    writeCache(null);
     return null;
   }
 
