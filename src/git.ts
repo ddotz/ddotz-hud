@@ -9,10 +9,11 @@ import type { GitInfo } from './types.js';
 
 export function getGitInfo(cwd: string): GitInfo | null {
   try {
-    const branch = execSync('git rev-parse --abbrev-ref HEAD 2>/dev/null', {
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', {
       cwd,
       encoding: 'utf-8',
       timeout: 1000,
+      stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
 
     // Get version from package.json or plugin.json

@@ -10,11 +10,15 @@ import {
 } from './colors.js';
 
 function shortenPath(path: string, maxLen = 30): string {
-  if (!path || path.length <= maxLen) return path;
+  if (!path) return '';
+  path = path.replace(/\\/g, '/');
 
-  const home = homedir();
-  if (path.startsWith(home)) {
-    path = '~' + path.slice(home.length);
+  let home = homedir();
+  if (home) {
+    home = home.replace(/\\/g, '/');
+    if (path.startsWith(home)) {
+      path = '~' + path.slice(home.length);
+    }
   }
 
   if (path.length <= maxLen) return path;
