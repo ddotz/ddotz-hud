@@ -52,6 +52,10 @@ export function render(ctx: HudContext): string {
 
   line1Parts.push(`${DIM}${shortenPath(cwd)}${RESET}`);
 
+  if (ctx.effort) {
+    line1Parts.push(`${DIM}${ctx.effort.icon} ${ctx.effort.level}${RESET}`);
+  }
+
   // Line 2: profile | 5h:XX% wk:XX% | ctx% | $cost | Reset Xh XXm left | agents:N | bg:N/5
   const line2Parts: string[] = [];
 

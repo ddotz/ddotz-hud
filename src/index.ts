@@ -7,6 +7,9 @@
  * Line 2: profile | 5h:XX% wk:XX% | ctx% | $cost | Reset Xh XXm left | agents:N | bg:N/5
  */
 
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
 import { readStdin, getContextPercent } from './stdin.js';
 import { getRateLimits } from './rate-limits.js';
 import { getGitInfo } from './git.js';
@@ -14,7 +17,7 @@ import { parseTranscript } from './transcript.js';
 import { estimateCost } from './cost.js';
 import { render } from './render.js';
 import { DIM, RESET } from './colors.js';
-import type { HudContext } from './types.js';
+import type { HudContext, EffortInfo } from './types.js';
 
 function formatResetTimeLeft(resetsAtIso: string | null): string {
   if (!resetsAtIso) {
@@ -67,6 +70,20 @@ async function main(): Promise<void> {
 
     const resetTimeLeft = formatResetTimeLeft(rateLimits?.fiveHourResetsAt ?? null);
 
+    // Effort level from settings.json
+    let effort: EffortInfo | null = null;
+    try {
+      const settingsPath = join(homedir(), '.claude/settings.json');
+      if (existsSync(settingsPath)) {
+        const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+        const level = settings.effortLevel;
+        if (level) {
+          const iconMap: Record<string, string> = { low: '○', medium: '◐', high: '●', max: '◉' };
+          effort = { level, icon: iconMap[level] ?? '◐' };
+        }
+      }
+    } catch { /* ignore */ }
+
     // Build context
     const ctx: HudContext = {
       stdin,
@@ -76,6 +93,7 @@ async function main(): Promise<void> {
       contextPercent,
       cost,
       resetTimeLeft,
+      effort,
     };
 
     // Render and output

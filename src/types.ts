@@ -53,6 +53,11 @@ export interface TodoStats {
   total: number;
 }
 
+export interface EffortInfo {
+  level: string;   // low, medium, high, max
+  icon: string;    // ○, ◐, ●, ◉
+}
+
 export interface HudContext {
   stdin: StatuslineStdin;
   rateLimits: RateLimits | null;
@@ -61,4 +66,5 @@ export interface HudContext {
   contextPercent: number;
   cost: number;
   resetTimeLeft: string;  // 5h rolling window reset time left
+  effort: EffortInfo | null;
 }
