@@ -78,7 +78,7 @@ async function main(): Promise<void> {
         const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
         const level = settings.effortLevel;
         if (level) {
-          const iconMap: Record<string, string> = { low: '○', medium: '◐', high: '●', max: '◉' };
+          const iconMap: Record<string, string> = { low: '○', medium: '◐', high: '●', xhigh: '◉', max: '◈' };
           effort = { level, icon: iconMap[level] ?? '◐' };
         }
       }

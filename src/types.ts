@@ -54,8 +54,8 @@ export interface TodoStats {
 }
 
 export interface EffortInfo {
-  level: string;   // low, medium, high, max
-  icon: string;    // ○, ◐, ●, ◉
+  level: string;   // low, medium, high, xhigh, max
+  icon: string;    // ○, ◐, ●, ◉, ◈
 }
 
 export interface HudContext {
